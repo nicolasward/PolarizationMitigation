@@ -4,7 +4,7 @@ This repository regroups the main elements of my Master's project at UCL.\
 In it, you'll find:
 * The most recent version of my report
 * Code (or fragments of code) supporting my experiments
-* A progress tracker in the [Project](https://github.com/nicolasward/PolarizationMitigation/projects) tab
+* A progress tracker in the [Projects](https://github.com/nicolasward/PolarizationMitigation/projects) tab
 
 ### Abstract
 With the widespread use of algorithmic curation systems in recent years – the automated, personalized selection and ranking of online content – growing concern over the nature and implications of their biases has been voiced by both their creators and users worldwide. Social networks in particular have been accused of exhibiting some form of bias, resulting in damaging filter bubbles and large scale misinformation spreading. \

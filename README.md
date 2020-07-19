@@ -3,7 +3,7 @@
 This repository regroups the main elements of my Master's project at UCL.\
 In it, you'll find:
 * The most recent version of my report
-* Code (or fragments of code) supporting my work
+* Code (or fragments of code) supporting my experiments
 * A progress tracker in the [Project](https://github.com/nicolasward/PolarizationMitigation/projects) tab
 
 ### Abstract

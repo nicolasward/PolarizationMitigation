@@ -5,7 +5,7 @@ def getdata():
     
     # ------ Get User Ratings: [user_id, movie_id, rating] ------ #
 
-    f = open('ml-100k/u.data', 'r+')
+    f = open('../Data/u.data', 'r+')
     movielens_raw = np.array([0, 0, 0, 0])
     for l in f: 
         movielens_raw = np.vstack((movielens_raw, list(map(int, l.strip().split("\t")))))
@@ -14,7 +14,7 @@ def getdata():
 
     # ------ Get Movie Genres: [movie_id, 19 movie categories] ------ #
 
-    f = open('ml-100k/u.item', 'r+', encoding = "ISO-8859-1")
+    f = open('../Data/u.item', 'r+', encoding = "ISO-8859-1")
     movie_genres = np.zeros((1, 20))
     indices   = list(range(5, 24))
     indices.insert(0, 0)

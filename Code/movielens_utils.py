@@ -2,19 +2,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 from operator import itemgetter
 
-def getdata():
+def getdata(binary_ratings = False):
     """
     Clustered movie genres:
     
-    0 : Action / Adventure / War
-    1 : Children / Animation
-    2 : Comedy / Musical 
-    3 : Thriller / Film-noir / Crime / Western
-    4 : Documentary
-    5 : Romance / Drama
-    6 : Fantasy / Sci-Fi
-    7 : Horror
-    8 : Mystery
+    1 : Action / Adventure / War
+    2 : Children / Animation
+    3 : Comedy / Musical 
+    4 : Thriller / Film-noir / Crime / Western
+    5 : Documentary
+    6 : Romance / Drama
+    7 : Fantasy / Sci-Fi
+    8 : Horror
+    9 : Mystery
     
     """
     
@@ -99,39 +99,97 @@ def getdata():
     unknown_genre_ids = movie_genres[movie_genres[:, 1] > 0][:, 0]
     ids               = np.where(np.in1d(movielens_final[:, 1], unknown_genre_ids) == True)[0]
     movielens_final   = np.delete(movielens_final, np.s_[ids], axis = 0)
+    
+    if binary_ratings:
+        movielens_final[:, 2] = [1 if element >= 4 else 0 for element in movielens_final[:, 2]]
+        
+        
+    # Swap the 2 last columns to obtain final formatting: [user_id, movie_id, genre, rating]
+        
+    movielens_final[:, [2, 3]] = movielens_final[:, [3, 2]]
+    
+    movielens_final[:, -2] += 1
         
     return movielens_final.astype(int)
 
 
-def user_stats(dataset, user_id = -1, plot = False):
-    
+def get_user(dataset, user_id = -1):
+        
     # Isolate user data
-    if user_id >= 0:
+    if user_id > 0:
         user = dataset[dataset[:, 0] == user_id, :]
     else:
         user = dataset
         
     # Initialize counts list and number of items for this user
-    counts = []
-    means  = []
+    like_ratios = []
+    means = []
+    likes = []
     n = user.shape[0]
-    genres = set(user[:, 3])
+    genres = set(user[:, -2])
     
     # For each category, calculate and store the average number of items rated by the user
     for j in genres:
-        k = sum(user[:, 3] == j)
-        counts.append(k)
-        means.append(k/n)
+        genre_j = user[user[:, -2] == j, :]
+        n_items = genre_j.shape[0]
+        n_likes = sum(genre_j[:, -1])
+        likes.append(n_likes)
+        ratio   = n_likes / n_items if n_items != 0 else 0
+        like_ratios.append(ratio)
+        means.append(n_items / n)
         
-    if plot:
-        plt.rcParams['figure.figsize'] = [15, 6]
-        plt.bar(list(genres), means)
-        plt.xticks(list(range(9)))
-        if user_id < 0:
-            plt.title('Proportion of each movie genre in the entire dataset')
-        else:
-            plt.title('Proportion of each movie genre rated by user %i' % user_id)
-        plt.xlabel('Genres')
-        plt.ylabel('Proportion')
+    if user_id > 0:
+        print('Total number of items rated by user %i :' % user_id, n)
+        print('Total number of items liked by user %i :' % user_id, sum(likes))
+    else:
+        print('Total number of items in dataset :' % user_id, n)
         
-    return counts, means
+    figure, _ = plt.subplots(2, 1)
+    figure.tight_layout(pad = 4.0)
+   
+    plt.subplot(2, 1, 1)
+    plt.bar(list(genres), means)
+    plt.xticks(list(range(1, 10)))
+    if user_id < 0:
+        plt.title('Proportion of each movie genre in the full dataset')
+    else:
+        plt.title('Proportion of each movie genre rated by user %i' % user_id)
+    plt.xlabel('Genres')
+    plt.ylabel('Proportion')
+
+    plt.subplot(2, 1, 2)
+    plt.bar(list(genres), like_ratios)
+    plt.xticks(list(range(1, 10)))
+    if user_id < 0:
+        plt.title('Per-genre like ratio for all users combined.')
+    else:
+        plt.title('Per-genre like ratio for user %i' % user_id)
+    plt.xlabel('Genres')
+    plt.ylabel('Like ratio')
+    
+    plt.show()
+    
+    if user_id > 0:
+        return user
+    else:
+        return like_ratios
+    
+def like_gaps(dataset):
+    
+    genres = set(dataset[:, -2])
+    user_ids = set(dataset[:, 0])
+    gaps = {}
+    
+    for user_id in user_ids:
+        user = dataset[dataset[:, 0] == user_id, :]
+        like_ratios = []
+        for j in genres:
+            genre_j = user[user[:, -2] == j, :]
+            n_items = genre_j.shape[0]
+            n_likes = sum(genre_j[:, -1])
+            ratio   = n_likes / n_items if n_items != 0 else 0
+            like_ratios.append(ratio)
+        s = sorted(like_ratios)[-2:]
+        gaps[user_id] = s[-1] - s[-2]
+    
+    return {k: v for k, v in sorted(gaps.items(), key = lambda item: item[1], reverse = True)}
